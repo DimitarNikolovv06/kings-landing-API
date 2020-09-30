@@ -1,4 +1,4 @@
-export interface TweetInterface extends Document {
+export interface TweetInterface {
   id: string;
   user: string;
   value: string;
@@ -10,12 +10,12 @@ export interface TweetInterface extends Document {
 
 export interface UserInterface {
   username: String;
-  password: String;
+  password: string;
   followers: Array<String>;
   following: Array<String>;
   tweets: Array<TweetInterface>;
-  bio: String;
-  location: String;
+  bio: string;
+  location: string;
   birthDate: Date | undefined;
-  website: String;
+  website: string;
 }

@@ -1,14 +1,32 @@
 import mongoose from "mongoose";
 
 export const tweetSchema = new mongoose.Schema({
-  // userID: mongoose.SchemaTypes.ObjectId,
-  user: String,
-  value: String,
-  likedBy: Array,
-  retweetedBy: Array,
-  comments: Array,
-  date: Date || undefined,
+  user: {
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: "User",
+  },
+  text: String,
+  likedBy: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
+  retweetedBy: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
+  comments: [
+    {
+      byUserId: mongoose.SchemaTypes.ObjectId,
+      value: String,
+    },
+  ],
+  date: Date,
+  imgURL: String || undefined,
 });
+
+tweetSchema.pre("find", function (next) {
+  this.populate("user");
+  this.populate("retweetedBy");
+  this.populate("likedBy");
+
+  next();
+});
+
+// tweetSchema.pre('')
 
 tweetSchema.set("toJSON", {
   transform: (_doc, ret) => {

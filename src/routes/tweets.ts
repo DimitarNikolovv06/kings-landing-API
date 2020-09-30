@@ -3,9 +3,7 @@ import Tweet from "../models/tweet";
 
 const router = express.Router();
 
-router.get("/", (_req, res) => res.send("<h1>Hello</h1>").status(200));
-
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   const newTweet = new Tweet(req.body);
 
   try {
@@ -13,7 +11,18 @@ router.post("/", async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(400).end();
+    next(error);
+  }
+});
+
+router.get("/", async (_req, res, next) => {
+  try {
+    const data = await Tweet.find();
+
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 

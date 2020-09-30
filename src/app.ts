@@ -3,7 +3,10 @@ import config from "./utils/config";
 import mongoose from "mongoose";
 import tweetsRouter from "./routes/tweets";
 import usersRouter from "./routes/users";
+import loginRouter from "./routes/login";
 import cors from "cors";
+import { errorHandler, unknownEndpoint } from "./utils/middleware";
+// require("express-async-errors");
 const app = express();
 
 mongoose
@@ -19,5 +22,9 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/tweets", tweetsRouter);
 app.use("/api/users", usersRouter);
+app.use("/login", loginRouter);
+
+app.use(errorHandler);
+app.use(unknownEndpoint);
 
 export default app;

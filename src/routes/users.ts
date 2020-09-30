@@ -1,12 +1,11 @@
 import bcrypt from "bcrypt";
 import express from "express";
 import User from "../models/user";
-import { UserInterface } from "../types";
 
 const router = express.Router();
 
 //create new user
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   if (req.body.password.length < 3) {
     return res.send({ err: "Password should be at least 3 symbols" }).end();
   }
@@ -31,72 +30,69 @@ router.post("/", async (req, res) => {
     res.json(saved);
   } catch (error) {
     console.error(error);
+    next(error);
   }
 });
 
 // get user by id
-router.get("/:id", async (req, res) => {
-  const user = (await User.findById(req.params.id)) as UserInterface | null;
-  if (user) {
-    const {
-      bio,
-      birthDate,
-      followers,
-      following,
-      location,
-      username,
-      website,
-      tweets,
-    } = user;
-
-    res.json({
-      bio,
-      birthDate,
-      followers,
-      following,
-      location,
-      username,
-      website,
-      tweets,
-    });
+router.get("/:id", async (req, res, next) => {
+  try {
+    if (req.query.withTweets === "true") {
+      const user = await User.findById(req.params.id).populate("tweets");
+      res.json(user);
+    } else {
+      const user = await User.findById(req.params.id);
+      res.json(user);
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
-
-  return res.send({ err: "Not found bruh" }).status(404);
 });
 
 //get all users
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res, next) => {
   try {
-    const data = ((await User.find()) as unknown) as UserInterface[] | null;
-    if (data) {
-      const safeData = data.map(
-        ({
-          tweets,
-          location,
-          bio,
-          username,
-          website,
-          following,
-          followers,
-          birthDate,
-        }: UserInterface) => ({
-          tweets,
-          location,
-          following,
-          website,
-          bio,
-          username,
-          followers,
-          birthDate,
-        })
-      );
-
-      res.json(safeData);
+    if (req.query.populateAll === "true") {
+      const data = await User.find()
+        .populate("tweets")
+        .populate("following")
+        .populate("followers");
+      res.json(data);
+    } else {
+      const data = await User.find();
+      res.json(data);
     }
-
-    res.send({ Err: "N0t found 404 :/" }).status(404);
   } catch (error) {
-    console.error(error);
+    console.log(error);
+    next(error);
+  }
+});
+
+//remove user
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const data = await User.deleteOne({ _id: req.params.id });
+    res.json(data);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+});
+
+//update user
+router.patch("/:id", async (req, res, next) => {
+  try {
+    const data = await User.findById(req.params.id);
+
+    if (data) {
+      const isUpdated = await User.updateOne({ _id: data.id }, { ...req.body });
+
+      res.json(isUpdated);
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 
