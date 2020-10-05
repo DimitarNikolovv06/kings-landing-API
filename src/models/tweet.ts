@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import { TweetInterface } from "../types";
 
-export const tweetSchema = new mongoose.Schema({
+const TweetSchema = new mongoose.Schema({
   user: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "User",
   },
-  text: String,
+  text: String || undefined,
   likedBy: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
   retweetedBy: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
   comments: [
@@ -14,21 +15,14 @@ export const tweetSchema = new mongoose.Schema({
       value: String,
     },
   ],
-  date: Date,
+  date: {
+    type: Date,
+    default: Date.now(),
+  },
   imgURL: String || undefined,
 });
 
-tweetSchema.pre("find", function (next) {
-  this.populate("user");
-  this.populate("retweetedBy");
-  this.populate("likedBy");
-
-  next();
-});
-
-// tweetSchema.pre('')
-
-tweetSchema.set("toJSON", {
+TweetSchema.set("toJSON", {
   transform: (_doc, ret) => {
     ret.id = ret._id.toString();
     delete ret._id;
@@ -36,4 +30,7 @@ tweetSchema.set("toJSON", {
   },
 });
 
-export default mongoose.model("Tweet", tweetSchema);
+export default mongoose.model<TweetInterface & mongoose.Document>(
+  "Tweet",
+  TweetSchema
+);

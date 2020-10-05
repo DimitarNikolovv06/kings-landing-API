@@ -1,9 +1,31 @@
 import mongoose from "mongoose";
+import validator from "validator";
+import uniqueValidator from "mongoose-unique-validator";
+import { UserInterface } from "../types";
+import { isRealName } from "../utils/validation";
 
-export const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
+  firstname: {
+    type: String,
+    required: true,
+    validate: {
+      validator: isRealName,
+      message: "{VALUE} is not real first name",
+    },
+  },
+  lastname: {
+    type: String,
+    required: true,
+    validate: {
+      validator: isRealName,
+      message: "{VALUE} is not real last name",
+    },
+  },
   username: {
     type: String,
     required: true,
+    minlength: 2,
+    unique: true,
   },
   password: {
     type: String,
@@ -11,24 +33,26 @@ export const userSchema = new mongoose.Schema({
     required: true,
     get: (): undefined => undefined,
   },
+  email: {
+    type: String,
+    validate: {
+      validator: validator.isEmail,
+      message: "{VALUE} is not real email.",
+    },
+    required: true,
+    unique: true,
+  },
   followers: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
   following: [{ type: mongoose.SchemaTypes.ObjectId, ref: "User" }],
   tweets: [{ type: mongoose.SchemaTypes.ObjectId, ref: "Tweet" }],
-  bio: String,
-  location: String,
-  birthDate: Date,
-  website: String,
+  dateOfBirth: Date,
+  dateJoined: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
-// userSchema.pre("find", function (next) {
-//   this.populate("followers");
-//   this.populate("following");
-//   this.populate("tweets");
-
-//   next();
-// });
-
-userSchema.set("toJSON", {
+UserSchema.set("toJSON", {
   transform: (doc, ret) => {
     ret.id = doc._id.toString();
     delete ret._id;
@@ -37,4 +61,11 @@ userSchema.set("toJSON", {
   getters: true,
 });
 
-export default mongoose.model("User", userSchema);
+UserSchema.plugin(uniqueValidator);
+
+const UserModel = mongoose.model<UserInterface & mongoose.Document>(
+  "User",
+  UserSchema
+);
+
+export default UserModel;

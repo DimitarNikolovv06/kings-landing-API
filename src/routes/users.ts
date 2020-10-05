@@ -5,7 +5,7 @@ import User from "../models/user";
 const router = express.Router();
 
 //create new user
-router.post("/", async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   if (req.body.password.length < 3) {
     return res.send({ err: "Password should be at least 3 symbols" }).end();
   }
@@ -15,14 +15,11 @@ router.post("/", async (req, res, next) => {
 
   try {
     const newUser = new User({
-      username: req.body.username,
+      ...req.body,
       password,
       followers: [],
       following: [],
       tweets: [],
-      bio: "",
-      location: "",
-      website: "",
     });
 
     const saved = await newUser.save();
@@ -34,30 +31,12 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// get user by id
-router.get("/:id", async (req, res, next) => {
-  try {
-    if (req.query.withTweets === "true") {
-      const user = await User.findById(req.params.id).populate("tweets");
-      res.json(user);
-    } else {
-      const user = await User.findById(req.params.id);
-      res.json(user);
-    }
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-
 //get all users
 router.get("/", async (req, res, next) => {
   try {
     if (req.query.populateAll === "true") {
-      const data = await User.find()
-        .populate("tweets")
-        .populate("following")
-        .populate("followers");
+      const data = await User.find().populate("tweets following followers");
+
       res.json(data);
     } else {
       const data = await User.find();
@@ -96,4 +75,24 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+// get user by id
+router.get("/:id", async (req, res, next) => {
+  if (req.params.id.length < 12) {
+    return res.status(400).send({ err: "Send valid ID" });
+  }
+
+  try {
+    if (req.query.withTweets === "true") {
+      const user = await User.findById(req.params.id).populate("tweets");
+      return res.json(user);
+    } else {
+      const user = await User.findById(req.params.id);
+      return res.json(user);
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+    return;
+  }
+});
 export default router;

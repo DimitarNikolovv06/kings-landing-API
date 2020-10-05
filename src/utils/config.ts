@@ -1,5 +1,9 @@
-import dotenv from "dotenv";
+import { cleanEnv, port, str } from "envalid";
 
-const config = dotenv.config().parsed;
+export const env = cleanEnv(process.env, {
+  PORT: port(),
+  SECRET: str(),
+  DB_URI: str(),
+});
 
-export default config;
+export default env;
