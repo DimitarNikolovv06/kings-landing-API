@@ -1,19 +1,26 @@
 import bcrypt from "bcrypt";
 import express from "express";
+import mongoose  from 'mongoose'
 import User from "../models/user";
+import { UserInterface } from "../types";
 
 const router = express.Router();
 
 //create new user
 router.post("/register", async (req, res, next) => {
-  if (req.body.password.length < 3) {
-    return res.send({ err: "Password should be at least 3 symbols" }).end();
-  }
 
-  const saltRounds = 10;
-  const password = await bcrypt.hash(req.body.password, saltRounds);
-
+  
   try {
+    console.log(req.body)
+    
+      // if(!req.body) return res.send("You forgot the credentials my dude")
+    
+      if (req.body.password.length < 3) {
+        return res.send({ err: "Password should be at least 3 symbols" }).end();
+      }
+    
+      const saltRounds: number = 10;
+      const password: string = await bcrypt.hash(req.body.password, saltRounds);
     const newUser = new User({
       ...req.body,
       password,
@@ -22,7 +29,7 @@ router.post("/register", async (req, res, next) => {
       tweets: [],
     });
 
-    const saved = await newUser.save();
+    const saved: UserInterface & mongoose.Document = await newUser.save();
 
     res.json(saved);
   } catch (error) {
@@ -35,11 +42,11 @@ router.post("/register", async (req, res, next) => {
 router.get("/", async (req, res, next) => {
   try {
     if (req.query.populateAll === "true") {
-      const data = await User.find().populate("tweets following followers");
+      const data: (UserInterface & mongoose.Document)[] = await User.find().populate("tweets following followers");
 
       res.json(data);
     } else {
-      const data = await User.find();
+      const data: (UserInterface & mongoose.Document)[] = await User.find();
       res.json(data);
     }
   } catch (error) {

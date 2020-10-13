@@ -63,7 +63,7 @@ UserSchema.set("toJSON", {
 
 UserSchema.plugin(uniqueValidator);
 
-const UserModel = mongoose.model<UserInterface & mongoose.Document>(
+const UserModel = mongoose.model<UserInterface>(
   "User",
   UserSchema
 );

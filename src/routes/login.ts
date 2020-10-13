@@ -4,17 +4,21 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "../utils/config";
 import { parseUserCredentials } from "../utils/validation";
-import { UserForToken } from "../types";
+import { UserCredentials, UserForToken, UserInterface } from "../types";
 
 const router = express.Router();
 
 router.post("/", async (req, res, next) => {
-  const { password, username } = parseUserCredentials(req.body);
+  const { password, username }: UserCredentials = parseUserCredentials(req.body);
 
   try {
-    const user = await User.findOne({ username });
+    const user: UserInterface  | null = await User.findOne({ username });
+    console.log(user)
 
     if (!user) {
+
+      console.log(user)
+
       return res.status(401).json({
         err: "Invalid credentials.",
       });

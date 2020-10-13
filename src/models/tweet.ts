@@ -30,7 +30,7 @@ TweetSchema.set("toJSON", {
   },
 });
 
-export default mongoose.model<TweetInterface & mongoose.Document>(
+export default mongoose.model<TweetInterface>(
   "Tweet",
   TweetSchema
 );

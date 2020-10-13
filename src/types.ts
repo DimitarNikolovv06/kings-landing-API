@@ -1,4 +1,6 @@
-export interface TweetInterface {
+import mongoose from 'mongoose' 
+
+export interface TweetInterface extends mongoose.Document {
   id: string;
   user: UserInterface | string;
   text: string;
@@ -9,7 +11,7 @@ export interface TweetInterface {
   imgURL: string;
 }
 
-export interface UserInterface {
+export interface UserInterface extends mongoose.Document {
   id: string;
   firstname: string;
   lastname: string;
@@ -40,3 +42,19 @@ export type UserForToken = {
   username: UserCredentials["username"];
   id: UserInterface["id"];
 };
+
+export type MongoUser = {
+    _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  username: string;
+  password: string;
+  followers: Array<UserInterface | string>;
+  following: Array<UserInterface | string>;
+  tweets: Array<TweetInterface | string>;
+  dateOfBirth: Date;
+  dateJoined: Date;
+  __v: number;
+}
+

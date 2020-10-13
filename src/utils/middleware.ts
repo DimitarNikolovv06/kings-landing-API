@@ -18,8 +18,7 @@ export const errorHandler = (
   } else if (err.name === "TypeError") {
     return res
       .status(400)
-      .json({ ...err })
-      .end();
+     .send({ error: err.message, name: err.name, stack: err.stack }); 
   } else if (err.name === "ValidationError") {
     return res
       .status(400)
@@ -31,6 +30,11 @@ export const errorHandler = (
       .send({ error: err.message, name: err.name, stack: err.stack });
   } else if (err.name === "JsonWebTokenError") {
     return res
+      .status(401)
+      .send({ ...err })
+      .end();
+  } else if(err.name === "UnauthorizedError"){
+      return res
       .status(401)
       .send({ ...err })
       .end();
